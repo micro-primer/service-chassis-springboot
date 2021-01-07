@@ -1,0 +1,3 @@
+LOGBACK_CONFIG_FILE: "logback-json.xml"
+ZIPKIN_SAMPLE_RATE: 1.0
+ZIPKIN_URL: "{{zipkin_url}}"

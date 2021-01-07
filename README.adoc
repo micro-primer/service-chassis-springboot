@@ -1,0 +1,193 @@
+= service-chassis-springboot
+:toc: preamble
+
+⚠️ Do not change anything! ⚠️
+
+== Service template rationale
+
+[quote, Chris Richardson, https://microservices.io/patterns/microservice-chassis.html]
+____
+On start the development of an application one often spends a significant amount of time putting in place the mechanisms to handle cross-cutting concerns. Examples of cross-cutting concern include:
+
+* **Externalized configuration** - includes credentials, and network locations of external services such as databases and message brokers
+* **Logging** - configuring of a logging framework such as log4j or logback
+* **Health checks** - a url that a monitoring service can “ping” to determine the health of the application
+* **Metrics** - measurements that provide insight into what the application is doing and how it is performing
+* **Distributed tracing** - instrument services with code that assigns each external request an unique identifier that is passed between services.
+____
+
+To quickly and easy get started with developing a microservice, a tailored service template is a great way to start. 
+
+A follow-up reading:
+
+* https://microservices.io/patterns/microservice-chassis.html
+* https://blog.thepete.net/blog/2020/09/25/service-templates-service-chassis/
+
+== Production readiness
+
+_Production Ready_, when used in relation to microservices, is used to describe the suitability for a service to be running on the production cluster, handling production requests and available for public consumption. Being Production Ready is a key quality criteria and, together with how the service fulfills its Functional Requirements, is a good indication of the service's level of quality.
+
+A link:https://12factor.net/[12 factor application] can be considered a baseline for a production ready service. Each factor of the checklist can be mapped onto a particular design decision implemented within this template.
+
+=== {counter:twelvefactors}. link:https://12factor.net/codebase[Codebase]
+
+[quote]
+There is only one codebase per app, but there will be many deploys of the app. A deploy is a running instance of the app. This is typically a production site, and one or more staging sites. Additionally, every developer has a copy of the app running in their local development environment, each of which also qualifies as a deploy.
+
+The app name (as defined in the repository / folder name) should be used for identification among other services and elements of infrastructure:
+
+- github repository name
+- kibana logs
+- grafana dashboards
+- zipkin traces
+- http client identification (an `X-Service` header set in http client for downstream dependencies)
+
+In root directory of every repository there is a `README.md` file. The file should contain information about what the service does, where it lives, how it is deployed, which product it pertains to, the criticality of it or any noteworthy external dependencies it has, including any diagrams, when necessary.
+
+To additionally enhance discoverability, service provides a Swagger / OpenAPI documentation endpoint.
+
+=== {counter:twelvefactors}. link:https://12factor.net/dependencies[Dependencies]
+
+This is self-explanatory, all dependencies are managed through Maven with no system or no provided dependencies.
+
+[#twelvefactors_config]
+=== {counter:twelvefactors}. link:https://12factor.net/config[Config]
+
+[quote]
+____
+An app’s config is everything that is likely to vary between deploys (staging, production, developer environments, etc). This includes:
+
+* Resource handles to the database, Memcached, and other backing services
+* Credentials to external services such as Amazon S3 or Twitter
+* Per-deploy values such as the canonical hostname for the deploy
+____
+
+All environment dependencies are managed via environmental variables, declared in `configuration` folder in the root of the directory structure, grouped by the environment (`live`, `test` etc).
+
+=== {counter:twelvefactors}. link:https://12factor.net/backing-services[Backing services]
+
+[quote]
+____
+A backing service is any service the app consumes over the network as part of its normal operation. Examples include datastores (such as MySQL or CouchDB), messaging/queueing systems (such as RabbitMQ or Beanstalkd), SMTP services for outbound email (such as Postfix), and caching systems (such as Memcached).
+
+The backing services are treated as attached resources. The code for a twelve-factor app makes no distinction between local and third party services. To the app, both are attached resources, accessed via a URL or other locator/credentials stored in the link:twelvefactors_config[config]
+____
+
+
+=== {counter:twelvefactors}. link:https://12factor.net/build-release-run[Build, release, run]
+
+//TODO
+
+=== {counter:twelvefactors}. link:https://12factor.net/processes[Processes]
+
+Twelve factor application is executed as one or more stateless processes.
+
+This is achieved through a docker containerization, as the final executable artifact of the service is in the form of a Docker container. In the root directory of the service there is a `Dockerfile` which defined how the application is executed in runtime.
+
+=== {counter:twelvefactors}. link:https://12factor.net/port-binding[Port bindings]
+
+[quote]
+The twelve-factor app is completely self-contained and does not rely on runtime injection of a webserver into the execution environment to create a web-facing service. The web app exports HTTP as a service by binding to a port, and listening to requests coming in on that port.
+
+The port binding is delivered either through an embedded web container for a springboot application or through using a source container (like `jetty` or any other web container) within the `Dockerfile`.
+
+=== {counter:twelvefactors}. link:https://12factor.net/concurrency[Concurrency]
+
+[quote]
+The process model truly shines when it comes time to scale out. The share-nothing, horizontally partitionable nature of twelve-factor app processes means that adding more concurrency is a simple and reliable operation. The array of process types and number of processes of each type is known as the process formation.
+
+Backed by the containerized application, horizontal scaling seems easy. However scaling, it's not only about service runtime, but requires structured design of the service code itself (locks, implicite caching etc).
+
+Any API exposed by the service is highly available so that there is no downtime during deployments or if one or more
+instances of the service or running server went down or became unreachable. Usually 2 instances of the service are enough.
+
+The sutability of multiple deployments is verified already in the blackbox tests, where more than a single instance of a service is set up. The blackbox tests are using link:https://testcontainers.org[testcontainers] to ensure at the very least ensure that a smoke test exists to assert that the service can startup using
+the given configuration.
+
+=== {counter:twelvefactors}. link:https://12factor.net/disposability[Disposability]
+
+The robustness with fast startup and graceful shutdown (meaning they can be started or stopped at a moment’s notice) is provided out of the box by the Spring framework (and wiring togther the application code, web containter and Docker runtime).
+
+=== {counter:twelvefactors}. link:https://12factor.net/dev-prod-parity[Dev/prod parity]
+
+To keep development, staging, and production as similar as possible, the Docker is the underlying runtime and a suite of blackbox tests support early verification of configuration correctness.
+
+This keeps the gap between development and production small:
+
+* *makes the time gap small*: a developer may write code and have it deployed hours or even just minutes later.
+* *makes the personnel gap small*: developers who wrote code are closely involved in deploying it and watching its behavior in production.
+* *makes the tools gap small*: keep development and production as similar as possible.
+
+=== {counter:twelvefactors}. link:https://12factor.net/logs[Logs]
+
+[quote]
+A twelve-factor app never concerns itself with routing or storage of its output stream. It should not attempt to write to or manage logfiles. Instead, each running process writes its event stream, unbuffered, to stdout. During local development, the developer will view this stream in the foreground of their terminal to observe the app’s behavior.
+
+Therefore, the logs the service ensures that the logging infrastructure can collect and rotate all log. The logs are written to `stdout` in a suitable format for log aggregation (Kibana).
+
+The different logs output (between dev and production to aid readability) can be tunes through environment variables (see: link:twelvefactors_config[config]).
+
+In addition to logs, the template supports all different flavours of observability:
+
+* *a liveness probe*: a ping endpoint (returning 200 status code) to indicate the service is live (for Consul or Kubernetes).
+* *a readiness probe* / *healthcheck*: service expose any health checks, and their status. The healthcheck should at least indicate any problems related to communicating with the underlying data store or other infrastructure dependencies (eg. RabbitMQ).
+* *metrics*: the service collects important operational and business metrics and expose them for scrapping by a central metrics store (like Prometheus).
+* *tracing*: service can connect to a Zipkin instance and publish distributed traces of incoming and outgoing communications.
+
+=== {counter:twelvefactors}. link:https://12factor.net/admin-processes[Admin processes]
+
+//TODO
+
+In additional to automated admin processes, the service provides a static page (`index.html`) which can serve as an entry point to admin dashboards (_JMX_) or diagnostics (_threaddump_)
+
+
+== Template architecture decisions
+
+The architectural decisions made on this project are keep close to the code, for easy access for all developers.
+Read more about it: http://thinkrelevance.com/blog/2011/11/15/documenting-architecture-decisions.
+
+[#adr-production-ready]
+=== ADR-0{counter:adr}: Make the system production ready
+
+.Context
+There is a number of cross-cutting concerns which a service must adhere to, in a microservices environment. A link:https://12factor.net/[12 factor application] can be considered a baseline for a production ready service. This template takes the 12 factor guidelines and extends them with implementations provided by the spring-boot and spring-cloud libraries. The details on taking 12 factor guideliness to code are outlined in the link:_production_readiness[production readiness section]
+
+.Decision
+The primary aim for this template is to address production readiness requirements and provide a quick and robust way to deploy to production with no time.
+
+.Consequences
+This project consciously skips database, queues etc integration as orthogonal to production readiness.
+
+
+=== ADR-0{counter:adr}: Provide straightforward and unopinionated choices
+
+.Context
+With a plethora of available databases, queues, persistence libraries etc, effectively supporting and providing a default configuration for available queues or databases is a complicated and hard to maintain code. What is more, not every service is queue or database (or both) bound, which would imply a more advanced source code manipulation to add or remove classes to existing codebase.
+
+.Decision
+Use only standard spring based (or spring related) libraries without any homegrown dependencies. Supporting configuration of backing services is beyond the scope of this template.
+
+.Consequences
+Similarly to the consequences of link:adr-production-ready[production readiness ADR] - the template omits configuration of particular backing services as choice of database, persistence layers implementation, queues and etc can be a subjective team choice.
+
+=== ADR-0{counter:adr}: Split tests by their nature
+
+.Context
+We should have as fast test feedback as possible to use TDD approach effectively. We should take into account:
+
+  - tested scope and bug cause visibility
+  - debuggability
+  - execution time
+  - ability to run desired test suite on demand
+
+.Decision
+A following structure for tests is proposed:
+
+- *unit* - no IO, just logic, runnable from the IDE. Run: `./mvnw test`
+- *integration* - IO, contracts, REST tests and all needing spring context in general, runnable from the IDE. Run: `./mvnw integration-test -pl app`
+- *blackBox* - system tests needing everything to be up and our application running from docker. Run: `./mvn integration-test -pl blackboxtests`
+
+.Consequences
+A typical execution time varies for each test type: from miliseconds for unit tests, through seconds for integration testing, up to minutes to run a complete black box test suite.
+
+Integration tests are slower but still much faster than blackbox tests. Both integration and unit tests are debuggable directly from the IDEs. Blackbox tests have no depdendency (nor visibility) on the actual codebases and tries to call the service using external API, without any insight into the actual implementation.
