@@ -9,6 +9,7 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
 import java.io.File;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
@@ -23,8 +24,8 @@ class SystemTestEnvironment implements BeforeAllCallback {
     private final String SERVICE_BASE_NAME = "service";
     private final int SERVICE_PORT = 8080;
 
-    private static DockerComposeContainer environment;
-    private static boolean environmentStarted = false;
+    private DockerComposeContainer environment;
+    private boolean environmentStarted = false;
 
     @Override
     public void beforeAll(ExtensionContext context) {
@@ -85,5 +86,4 @@ class SystemTestEnvironment implements BeforeAllCallback {
     private String getServiceInstanceName(int instanceNumber) {
         return SERVICE_BASE_NAME + "_" + instanceNumber;
     }
-
 }
