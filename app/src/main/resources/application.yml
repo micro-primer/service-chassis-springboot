@@ -22,5 +22,10 @@ management:
     exposure.include: ping, health, heapdump, threaddump, loggers, prometheus, jolokia, hawtio
   endpoint.health.show-details: always
 
+springfox:
+  documentation:
+    swagger-ui:
+      base-url: /actuator/
+
 hawtio:
   authenticationEnabled: false

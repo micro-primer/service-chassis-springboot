@@ -1,6 +1,5 @@
 package com.pttrn42.microprimer.servicechassispringboot;
 
-import io.restassured.http.ContentType;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.RepetitionInfo;
@@ -56,6 +55,17 @@ public class SmokeTest {
     }
 
     @Test
+    void shouldExposeHawtioUi() {
+        given()
+                .baseUri(environment.serviceUrl()) //example how to get url of the random instance
+        .when()
+                .get("/actuator/hawtio")
+        .then()
+                .body(containsString("<title>Hawtio</title>"))
+                .statusCode(200);
+    }
+
+    @Test
     void shouldExposeThreadDump() {
         given()
                 .baseUri(environment.serviceUrl()) //example how to get url of the random instance
@@ -93,8 +103,9 @@ public class SmokeTest {
         given()
                 .baseUri(environment.serviceUrl()) //example how to get url of the random instance
         .when()
-                .get("/swagger-ui/index.html")
+                .get("/actuator/swagger-ui/index.html")
         .then()
+                .body(containsString("<title>Swagger UI</title>"))
                 .statusCode(200);
     }
 
