@@ -48,7 +48,7 @@ public class SmokeTest {
                 .baseUri(environment.serviceUrl()) //example how to get url of the random instance
                 .queryParam("mimeType", "application/json")
         .when()
-                .get("/actuator/hawtio/jolokia")
+                .get("/actuator/jolokia")
         .then()
                 .body("status", equalTo(200))
                 .body("request.type", equalTo("version"))
@@ -70,11 +70,31 @@ public class SmokeTest {
     void shouldExposePrometheusMetrics() {
         given()
                 .baseUri(environment.serviceUrl()) //example how to get url of the random instance
-                .accept(ContentType.TEXT)
         .when()
                 .get("/actuator/prometheus")
         .then()
                 .body(containsString("app=\"service-chassis-springboot\""))
+                .statusCode(200);
+    }
+
+    @Test
+    void shouldExposeSwaggerApi() {
+        given()
+                .baseUri(environment.serviceUrl()) //example how to get url of the random instance
+        .when()
+                .get("/v3/api-docs")
+        .then()
+                .body("openapi", equalTo("3.0.3"))
+                .statusCode(200);
+    }
+
+    @Test
+    void shouldExposeSwaggerUI() {
+        given()
+                .baseUri(environment.serviceUrl()) //example how to get url of the random instance
+        .when()
+                .get("/swagger-ui/index.html")
+        .then()
                 .statusCode(200);
     }
 

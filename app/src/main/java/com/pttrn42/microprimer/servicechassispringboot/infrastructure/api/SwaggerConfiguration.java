@@ -14,7 +14,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import static java.util.Collections.emptyList;
 
 @Configuration
-@EnableSwagger2
 class SwaggerConfiguration {
 
     @Bean
