@@ -3,5 +3,12 @@ version: "3.7"
 services:
   service:
     build: ../../../
+    environment:
+      ZIPKIN_URL: http://zipkin:8080
+    links:
+      - wiremock:zipkin
     ports:
       - 8080
+
+  wiremock:
+    image: rodolpheche/wiremock:2.24.0-alpine

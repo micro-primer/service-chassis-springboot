@@ -1,16 +1,23 @@
 package com.pttrn42.microprimer.servicechassispringboot;
 
+import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.RepetitionInfo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import java.util.List;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.junit.Assert.assertThat;
 
 @Slf4j
 public class SmokeTest {
@@ -107,6 +114,15 @@ public class SmokeTest {
         .then()
                 .body(containsString("<title>Swagger UI</title>"))
                 .statusCode(200);
+    }
+
+    @Test
+    @AfterAll
+    static void shouldRecordZipkinInteractions() {
+        List<LoggedRequest> allRequests = environment.wireMock()
+                .find(postRequestedFor(urlPathEqualTo("/api/v2/spans")));
+
+        assertThat(allRequests, hasSize(greaterThan(0)));
     }
 
 }
