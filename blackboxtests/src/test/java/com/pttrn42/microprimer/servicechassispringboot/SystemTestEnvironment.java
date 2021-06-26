@@ -2,7 +2,6 @@ package com.pttrn42.microprimer.servicechassispringboot;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.client.WireMockBuilder;
-import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 import io.restassured.RestAssured;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.extension.BeforeAllCallback;

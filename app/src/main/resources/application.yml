@@ -6,7 +6,7 @@ spring:
       type: web
   sleuth:
     web:
-      additional-skip-pattern: "/actuator.*"
+      additional-skip-pattern: "/actuator/.*"
     sampler:
       probability: ${ZIPKIN_SAMPLE_RATE:0.1}
   cloud:

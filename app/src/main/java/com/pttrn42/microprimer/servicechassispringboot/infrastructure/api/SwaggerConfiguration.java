@@ -1,15 +1,18 @@
 package com.pttrn42.microprimer.servicechassispringboot.infrastructure.api;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import static java.util.Collections.emptyList;
 
@@ -34,5 +37,19 @@ class SwaggerConfiguration {
                         "",
                         emptyList()
                 ));
+    }
+
+    @Bean
+    WebMvcConfigurer swaggerUiConfiguration(@Value("${springfox.documentation.swagger-ui.base-url}")  String swaggerUiUrl) {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addViewControllers(ViewControllerRegistry registry) {
+                registry.addRedirectViewController(swaggerUiUrl + "/swagger-ui", swaggerUiUrl + "/swagger-ui/")
+                        .setKeepQueryParams(true)
+                        .setStatusCode(HttpStatus.PERMANENT_REDIRECT);
+                registry.addViewController(swaggerUiUrl + "/swagger-ui/")
+                        .setViewName("forward:" + swaggerUiUrl + "/swagger-ui/index.html");
+            }
+        };
     }
 }

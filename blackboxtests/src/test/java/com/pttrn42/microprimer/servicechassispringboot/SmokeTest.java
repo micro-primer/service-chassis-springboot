@@ -7,6 +7,8 @@ import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.RepetitionInfo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 
@@ -105,12 +107,13 @@ public class SmokeTest {
                 .statusCode(200);
     }
 
-    @Test
-    void shouldExposeSwaggerUI() {
+    @ParameterizedTest
+    @ValueSource(strings = {"/actuator/swagger-ui/index.html", "/actuator/swagger-ui/"})
+    void shouldExposeSwaggerUI(String url) {
         given()
                 .baseUri(environment.serviceUrl()) //example how to get url of the random instance
         .when()
-                .get("/actuator/swagger-ui/index.html")
+                .get(url)
         .then()
                 .body(containsString("<title>Swagger UI</title>"))
                 .statusCode(200);
