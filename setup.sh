@@ -82,7 +82,7 @@ setup_project_name() {
   "${SED[@]}" -e "s/$PROJECT_NAME_PLACEHOLDER/$PROJECT_NAME/g" app/src/main/resources/application.yml
   "${SED[@]}" -e "s/$PROJECT_NAME_PLACEHOLDER/$PROJECT_NAME/g" app/src/main/java/com/pttrn42/microprimer/servicechassispringboot/infrastructure/api/SwaggerConfiguration.java
   "${SED[@]}" -e "s/$PROJECT_NAME_PLACEHOLDER/$PROJECT_NAME/g" app/src/main/resources/static/index.html
-  "${SED[@]}" -e "s/$PROJECT_NAME_PLACEHOLDER/$PROJECT_NAME/g" blackboxtests/src/test/java/com/pttrn42/microprimer/servicechassispring/SmokeTest.java
+  "${SED[@]}" -e "s/$PROJECT_NAME_PLACEHOLDER/$PROJECT_NAME/g" blackboxtests/src/test/java/com/pttrn42/microprimer/servicechassispringboot/SmokeTest.java
   "${SED[@]}" -e "s/$PROJECT_NAME_PLACEHOLDER/$PROJECT_NAME/g" README_template.md
 }
 
